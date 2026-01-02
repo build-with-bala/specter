@@ -1,0 +1,60 @@
+# ── Python ────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+*.whl
+.eggs/
+*.manifest
+*.spec
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Testing / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Type checking
+.mypy_cache/
+.pytype/
+.pyre/
+
+# ── Specter ───────────────────────────────────────────────────────
+config/local.yaml
+recordings/
+screenshots/
+extracted_data.json
+example_screenshot.png
+stealth_screenshot.png
+*.recording.json
+
+# Chrome user data (temp profiles)
+specter-*/
+
+# ── IDE / OS ──────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ── Secrets ───────────────────────────────────────────────────────
+.env
+.env.local
+.env.production
+*.pem
+*.key
