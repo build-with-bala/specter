@@ -1,0 +1,89 @@
+# ============================================================
+#  Specter — default configuration
+#  Copy to config/local.yaml and edit.  Local overrides default.
+# ============================================================
+
+browser:
+  headless: true
+  debug_port: 9222
+  window_width: 1920
+  window_height: 1080
+  locale: "en-US"
+  timezone: null                 # e.g. "America/New_York"
+  proxy: null                    # e.g. "http://127.0.0.1:8080"
+  persist_profile: false
+  user_data_dir: null
+  extra_args: []
+  launch_timeout: 15.0           # seconds to wait for Chrome CDP
+
+stealth:
+  enabled: false
+  user_agent: null               # null = rotate from data/user_agents.json
+  rotate_user_agent: true
+  evasions:
+    webdriver: true              # delete navigator.webdriver flag
+    chrome_runtime: true         # spoof window.chrome.runtime
+    permissions: true            # override Notification.permission query
+    plugins: true                # fake navigator.plugins array
+    languages: true              # align navigator.languages with locale
+    webgl_vendor: true           # override WebGL renderer strings
+    hairline: true               # fix missing hairline CSS feature
+    media_codecs: true           # report standard codec support
+    canvas_fingerprint: true     # add imperceptible noise to canvas reads
+  human_input:
+    enabled: true
+    mouse_bezier_steps: 20       # points in each Bezier mouse path
+    mouse_jitter: 1.5            # pixel noise on mouse paths
+    typing_wpm: 80               # words-per-minute baseline
+    typing_variance: 0.4         # inter-key delay jitter (0-1)
+    click_delay_ms: [40, 120]    # random range before/after clicks
+    scroll_step_px: [80, 250]    # random scroll distance per step
+
+network:
+  request_timeout: 30.0          # seconds per CDP command
+  navigation_timeout: 30.0
+  network_idle_time: 0.5         # seconds of silence = "idle"
+  max_concurrent_requests: 50
+  block_resource_types: []       # e.g. ["Image", "Font", "Media"]
+  intercept_patterns: []         # list of InterceptRule-style dicts
+  headers: {}                    # extra headers for every request
+  cookies: []                    # pre-set cookies [{name, value, domain, ...}]
+
+ai:
+  default_provider: "openai"
+  providers:
+    openai:
+      model: "gpt-4o"
+      api_key: null              # or set OPENAI_API_KEY env var
+      base_url: "https://api.openai.com/v1"
+      temperature: 0.2
+      max_tokens: 4096
+    anthropic:
+      model: "claude-sonnet-4-20250514"
+      api_key: null              # or set ANTHROPIC_API_KEY env var
+      base_url: "https://api.anthropic.com"
+      temperature: 0.2
+      max_tokens: 4096
+    ollama:
+      model: "llama3"
+      base_url: "http://localhost:11434"
+      temperature: 0.2
+      max_tokens: 4096
+  vision:
+    enabled: true
+    screenshot_quality: 80       # JPEG quality for vision screenshots
+    max_resolution: [1280, 720]
+  extraction:
+    retries: 2
+    chunk_size: 4000             # max tokens per DOM chunk
+
+recording:
+  output_dir: "recordings"
+  include_screenshots: false
+  screenshot_interval: 0.0       # 0 = only on action, >0 = periodic
+  include_network: false
+
+logging:
+  level: "INFO"                  # DEBUG, INFO, WARNING, ERROR
+  file: null                     # log file path; null = stderr only
+  format: "%(asctime)s [%(levelname)s] %(name)s — %(message)s"
