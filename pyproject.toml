@@ -1,0 +1,71 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "specter"
+version = "2.0.0"
+description = "Autonomous browser agent with direct Chrome DevTools Protocol control."
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.11"
+authors = [
+    {name = "Specter Contributors"},
+]
+keywords = ["browser", "automation", "cdp", "chrome", "devtools", "stealth", "agent"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Internet :: WWW/HTTP :: Browsers",
+    "Topic :: Software Development :: Testing",
+    "Typing :: Typed",
+]
+dependencies = [
+    "websockets>=13.0,<15.0",
+    "aiohttp>=3.9,<4.0",
+    "pyyaml>=6.0,<7.0",
+    "click>=8.1,<9.0",
+]
+
+[project.optional-dependencies]
+ai = [
+    "openai>=1.40,<2.0",
+    "anthropic>=0.30,<1.0",
+]
+dev = [
+    "pytest>=8.0,<9.0",
+    "pytest-asyncio>=0.23,<1.0",
+    "mypy>=1.10,<2.0",
+    "ruff>=0.5,<1.0",
+]
+
+[project.scripts]
+specter = "specter.cli:main"
+
+[project.urls]
+Repository = "https://github.com/specter-agent/specter"
+Issues = "https://github.com/specter-agent/specter/issues"
+
+[tool.setuptools.packages.find]
+include = ["specter*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "SIM"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_unused_configs = true
