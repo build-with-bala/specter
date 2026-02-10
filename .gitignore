@@ -44,7 +44,6 @@ stealth_screenshot.png
 specter-*/
 
 # ── IDE / OS ──────────────────────────────────────────────────────
-.vscode/
 .idea/
 *.swp
 *.swo
@@ -58,3 +57,4 @@ Thumbs.db
 .env.production
 *.pem
 *.key
+.gitignore
