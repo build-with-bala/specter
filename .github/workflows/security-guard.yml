@@ -1,0 +1,84 @@
+name: security-guard
+
+# Self-contained by necessity: Ahoum-Dev/local-security-guard is private, and a
+# repo's default GITHUB_TOKEN cannot pull a private action. Everything needed is
+# inline so this file can be dropped into any repo unchanged.
+#
+# Covers the three carriers seen in the 2026-06 / 07 / 08 infections. The 08 wave
+# got past the previous guard because that one only inspected build configs, and
+# the payload had moved to .vscode/tasks.json.
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Auto-running editor tasks
+        run: |
+          # runOn:folderOpen executes the moment the repo is opened in
+          # VS Code / Cursor / code-server. No build, no npm install.
+          hits=$(find . -name 'tasks.json' -not -path './node_modules/*' -not -path './.git/*' \
+                   -exec grep -li 'folderOpen' {} \; 2>/dev/null)
+          if [ -n "$hits" ]; then
+            echo "::error::EtherHiding auto-run task detected"
+            echo "$hits" | while read -r f; do echo "  $f"; sed -n '1,40p' "$f"; done
+            exit 1
+          fi
+          echo "ok — no folderOpen tasks"
+
+      - name: Font files that are not fonts
+        run: |
+          # A genuine woff2 starts with the ASCII bytes wOF2. The payload carrier
+          # is JavaScript wearing a font's filename.
+          fail=0
+          while IFS= read -r f; do
+            magic=$(dd if="$f" bs=1 count=4 2>/dev/null | tr -d '\0')
+            if [ "$magic" != "wOF2" ]; then
+              echo "::error file=$f::not a real woff2 (magic='$magic', $(wc -c <"$f") bytes)"
+              fail=1
+            fi
+          done <<< "$(find . -name '*.woff2' -not -path './node_modules/*' -not -path './.git/*' 2>/dev/null)"
+          [ "$fail" = "1" ] && exit 1
+          echo "ok — all woff2 files are real fonts"
+
+      - name: Loader markers in build configs
+        run: |
+          # The \u-escaped variant is why a grep for "ether" or "trongrid" misses
+          # this: every identifying string is escaped. Match the escaping itself.
+          hits=$(find . \( -name 'package.json' -o -name '*.config.js' -o -name '*.config.ts' \
+                   -o -name '*.config.mjs' -o -name '*.config.cjs' -o -name '.eslintrc*' \) \
+                   -not -path './node_modules/*' -not -path './.git/*' \
+                   -exec grep -liE 'global\[.!.\]|_\$_1e42|api\.trongrid\.io|fullnode\.mainnet\.aptoslabs\.com|eval\(atob|\\u00[0-9a-f]{2}\\u00[0-9a-f]{2}\\u00' {} \; 2>/dev/null)
+          if [ -n "$hits" ]; then
+            echo "::error::EtherHiding loader marker in a build config (executes at build time)"
+            echo "$hits" | while read -r f; do echo "  $f ($(wc -c <"$f") bytes)"; tail -c 200 "$f"; echo; done
+            exit 1
+          fi
+          echo "ok — build configs clean"
+
+      - name: Oversized build configs
+        run: |
+          # Catches a future variant that changes its strings but not its shape:
+          # the payload is appended, so an 11-line postcss.config.mjs becomes 9 KB.
+          fail=0
+          while IFS= read -r f; do
+            sz=$(wc -c <"$f")
+            if [ "$sz" -gt 6000 ]; then
+              echo "::error file=$f::build config is ${sz} bytes — implausibly large, inspect the tail"
+              fail=1
+            fi
+          done <<< "$(find . \( -name '*.config.js' -o -name '*.config.mjs' -o -name '*.config.cjs' -o -name '.eslintrc*' \) \
+                       -not -path './node_modules/*' -not -path './.git/*' 2>/dev/null)"
+          [ "$fail" = "1" ] && exit 1
+          echo "ok — no oversized build configs"
